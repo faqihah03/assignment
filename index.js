@@ -31,7 +31,7 @@ const options = {
 const swaggerSpec = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-const uri = "mongodb+srv://ainfaqihah:Ain_020803@cluster0.5nmy5.mongodb.net/battleship_game?retryWrites=true&w=majority&appName=Cluster0";
+const uri = "mongodb+srv://ainfaqihah:Ain_020803@cluster0.5nmy5.mongodb.net/";
 const client = new MongoClient(uri);
 app.use(express.json());
 
@@ -822,7 +822,7 @@ async function run() {
     app.get('/', (req, res) => {
         res.send('Welcome to the BattleShip Game');
       });
-      
+
   } catch (err) {
     console.error(err);
     process.exit(1);
