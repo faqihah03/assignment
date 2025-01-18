@@ -494,7 +494,7 @@ app.post('/player', verifyToken, isAdmin, async (req, res) => {
  *     summary: Retrieve all players (Admin only)
  *     description: Allows an admin to retrieve a list of all players from the game database.
  *     tags:
- *       - Players
+ *       - Admin
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -564,7 +564,7 @@ app.get('/players', verifyToken, isAdmin, async (req, res) => {
  *     summary: Update a player's information (Player can update their own data, Admin can update any)
  *     description: Allows a player to update their username or password. Admin can update any player's data.
  *     tags:
- *       - Players
+ *       - Admin
  *     parameters:
  *       - name: id
  *         in: path
@@ -696,7 +696,7 @@ app.patch('/player/:id', verifyToken, isAdminOrPlayer, async (req, res) => {
  *     summary: Delete a player by ID (Admin only)
  *     description: Allows an admin to delete a player from the system by their ID.
  *     tags:
- *       - Players
+ *       - Admin
  *     parameters:
  *       - name: id
  *         in: path
