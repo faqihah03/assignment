@@ -231,12 +231,14 @@ app.post('/admin/logout', verifyToken, async (req, res) => {
 });
 
 
+
+
 /**
  * @swagger
  * /player/signup:
  *   post:
  *     summary: Sign up a new player
- *     description: Create a new player account with a username and password.
+ *     description: Create a new player account with a username and password that follows a strong password policy.
  *     tags:
  *       - Player
  *     requestBody:
@@ -252,8 +254,8 @@ app.post('/admin/logout', verifyToken, async (req, res) => {
  *                 example: player1
  *               password:
  *                 type: string
- *                 description: Password for the new player
- *                 example: password123
+ *                 description: Password for the new player, must follow the strong password policy
+ *                 example: StrongP@ss123
  *     responses:
  *       '201':
  *         description: Player signed up successfully.
@@ -271,7 +273,7 @@ app.post('/admin/logout', verifyToken, async (req, res) => {
  *                   description: ID of the newly created player
  *                   example: 60a7b4f5313e5a001d6fe8a9
  *       '400':
- *         description: Bad Request - Username already taken.
+ *         description: Bad Request - Username already taken or password does not meet requirements.
  *         content:
  *           application/json:
  *             schema:
@@ -280,30 +282,36 @@ app.post('/admin/logout', verifyToken, async (req, res) => {
  *                 message:
  *                   type: string
  *                   description: Error message
- *                   example: Username already taken
+ *                   example: "Username already taken" or "Password must be at least 8 characters long and contain one lowercase letter, one uppercase letter, one digit, and one special character."
  *       '500':
  *         description: Internal server error.
  */
 
 // Authentication: Player Sign Up
 app.post('/player/signup', async (req, res) => {
-  const { username, password } = req.body;
-
-  const existingPlayer = await client.db("gameDB").collection("players").findOne({ username });
-  if (existingPlayer) {
-    return res.status(400).send({ message: 'Username already taken' });
-  }
-
-  const hashedPassword = bcrypt.hashSync(password, 10);
-
-  try {
-    const result = await client.db("gameDB").collection("players").insertOne({ username, password: hashedPassword });
-    res.status(201).send({ message: 'Player signed up', playerId: result.insertedId });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
-  }
-});
+    const { username, password } = req.body;
+  
+    const existingPlayer = await client.db("gameDB").collection("players").findOne({ username });
+    if (existingPlayer) {
+      return res.status(400).send({ message: 'Username already taken' });
+    }
+  
+    // Check the password strength
+    const passwordValidation = isStrongPassword(password);
+    if (passwordValidation !== true) {
+      return res.status(400).send({ message: passwordValidation.join(' ') });
+    }
+  
+    const hashedPassword = bcrypt.hashSync(password, 10);
+  
+    try {
+      const result = await client.db("gameDB").collection("players").insertOne({ username, password: hashedPassword });
+      res.status(201).send({ message: 'Player signed up', playerId: result.insertedId });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal server error');
+    }
+  });
 
 /**
  * @swagger
@@ -561,12 +569,13 @@ async function isAdminOrPlayer(req, res, next) {
 }
 
 // CRUD for Players
+
 /**
  * @swagger
  * /player:
  *   post:
  *     summary: Create a new player
- *     description: Allows an admin to create a new player account with a username and password. Requires admin authorization.
+ *     description: Allows an admin to create a new player account with a username and password that follows a strong password policy. Requires admin authorization.
  *     tags:
  *       - Admin
  *     security:
@@ -584,8 +593,8 @@ async function isAdminOrPlayer(req, res, next) {
  *                 example: player2
  *               password:
  *                 type: string
- *                 description: Password for the new player
- *                 example: password456
+ *                 description: Password for the new player, must follow the strong password policy
+ *                 example: StrongP@ss456
  *     responses:
  *       '201':
  *         description: Player created successfully.
@@ -603,7 +612,7 @@ async function isAdminOrPlayer(req, res, next) {
  *                   description: ID of the newly created player
  *                   example: 60a7b4f5313e5a001d6fe8a9
  *       '400':
- *         description: Bad Request - Username already taken.
+ *         description: Bad Request - Username already taken or password does not meet requirements.
  *         content:
  *           application/json:
  *             schema:
@@ -612,7 +621,7 @@ async function isAdminOrPlayer(req, res, next) {
  *                 message:
  *                   type: string
  *                   description: Error message
- *                   example: Username already taken
+ *                   example: "Username already taken" or "Password must be at least 8 characters long and contain one lowercase letter, one uppercase letter, one digit, and one special character."
  *       '401':
  *         description: Unauthorized - Invalid token or insufficient permissions.
  *       '500':
@@ -621,23 +630,29 @@ async function isAdminOrPlayer(req, res, next) {
 
 // Create a Player (Only Admin)
 app.post('/player', verifyToken, isAdmin, async (req, res) => {
-  const { username, password } = req.body;
-
-  const existingPlayer = await client.db("gameDB").collection("players").findOne({ username });
-  if (existingPlayer) {
-    return res.status(400).send({ message: 'Username already taken' });
-  }
-
-  const hashedPassword = bcrypt.hashSync(password, 10);
-
-  try {
-    const result = await client.db("gameDB").collection("players").insertOne({ username, password: hashedPassword });
-    res.status(201).send({ message: 'Player created', playerId: result.insertedId });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
-  }
-});
+    const { username, password } = req.body;
+  
+    // Check the password strength
+    const passwordValidation = isStrongPassword(password);
+    if (passwordValidation !== true) {
+      return res.status(400).send({ message: passwordValidation.join(' ') });
+    }
+  
+    const existingPlayer = await client.db("gameDB").collection("players").findOne({ username });
+    if (existingPlayer) {
+      return res.status(400).send({ message: 'Username already taken' });
+    }
+  
+    const hashedPassword = bcrypt.hashSync(password, 10);
+  
+    try {
+      const result = await client.db("gameDB").collection("players").insertOne({ username, password: hashedPassword });
+      res.status(201).send({ message: 'Player created', playerId: result.insertedId });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal server error');
+    }
+  });
 
 /**
  * @swagger
@@ -1736,6 +1751,33 @@ app.post('/game/:id/move', verifyToken, isPlayer, async (req, res) => {
       res.status(500).json({ message: 'Error making move', error: err.message });
   }
 });
+
+// Updated password policy check
+function isStrongPassword(password) {
+    const errors = [];
+  
+    if (password.length < 8) {
+      errors.push('Password must be at least 8 characters long.');
+    }
+  
+    if (!/[a-z]/.test(password)) {
+      errors.push('Password must contain at least one lowercase letter.');
+    }
+  
+    if (!/[A-Z]/.test(password)) {
+      errors.push('Password must contain at least one uppercase letter.');
+    }
+  
+    if (!/\d/.test(password)) {
+      errors.push('Password must contain at least one digit.');
+    }
+  
+    if (!/\W/.test(password)) {
+      errors.push('Password must contain at least one special character.');
+    }
+  
+    return errors.length === 0 ? true : errors;
+  }
 
 // Connect to MongoDB and start the server
 async function run() {
