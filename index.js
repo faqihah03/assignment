@@ -114,6 +114,82 @@ app.post('/admin/login', async (req, res) => {
   res.status(401).send('Invalid credentials');
 });
 
+/**
+ * @swagger
+ * /admin/logout:
+ *   post:
+ *     summary: Admin logout
+ *     description: Logs out an admin by invalidating their token and adding it to the blacklist.
+ *     tags:
+ *       - Admin
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: "admin123"
+ *               password:
+ *                 type: string
+ *                 example: "securePassword123"
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Admin successfully logged out and token invalidated.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Logged out successfully"
+ *       '401':
+ *         description: Invalid credentials provided (username or password is incorrect).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid credentials"
+ *       '403':
+ *         description: Forbidden access (only the logged-in admin can log out).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized to log out this admin"
+ *       '404':
+ *         description: Admin not found in the database.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Admin not found"
+ *       '500':
+ *         description: Internal server error occurred during the logout process.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
+
 // Authentication: Admin Logout
 app.post('/admin/logout', verifyToken, async (req, res) => {
   const { username, password } = req.body;
@@ -287,6 +363,82 @@ app.post('/player/login', async (req, res) => {
 
   res.status(401).send('Invalid credentials');
 });
+
+/**
+ * @swagger
+ * /player/logout:
+ *   post:
+ *     summary: Player sign out
+ *     description: Logs out a player by invalidating their token and adding it to the blacklist. Admin can log out players as well.
+ *     tags:
+ *       - Player
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: "player123"
+ *               password:
+ *                 type: string
+ *                 example: "playerPassword123"
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Player successfully logged out and token invalidated (or admin logged out a player).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Logged out successfully"
+ *       '401':
+ *         description: Invalid credentials provided (username or password is incorrect).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid credentials"
+ *       '403':
+ *         description: Forbidden access (player trying to log out another player or an unauthorized admin action).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized to log out this player"
+ *       '404':
+ *         description: Player not found in the database.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Player not found"
+ *       '500':
+ *         description: Internal server error occurred during the logout process.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
 
 // Authentication: Player Sign Out
 app.post('/player/logout', verifyToken, async (req, res) => {
