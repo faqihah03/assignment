@@ -409,6 +409,64 @@ async function isAdminOrPlayer(req, res, next) {
 }
 
 // CRUD for Players
+/**
+ * @swagger
+ * /player:
+ *   post:
+ *     summary: Create a new player
+ *     description: Allows an admin to create a new player account with a username and password. Requires admin authorization.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: Desired username for the new player
+ *                 example: player2
+ *               password:
+ *                 type: string
+ *                 description: Password for the new player
+ *                 example: password456
+ *     responses:
+ *       '201':
+ *         description: Player created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: Player created
+ *                 playerId:
+ *                   type: string
+ *                   description: ID of the newly created player
+ *                   example: 60a7b4f5313e5a001d6fe8a9
+ *       '400':
+ *         description: Bad Request - Username already taken.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message
+ *                   example: Username already taken
+ *       '401':
+ *         description: Unauthorized - Invalid token or insufficient permissions.
+ *       '500':
+ *         description: Internal server error.
+ */
+
 // Create a Player (Only Admin)
 app.post('/player', verifyToken, isAdmin, async (req, res) => {
   const { username, password } = req.body;
@@ -565,6 +623,38 @@ function createGame() {
       return { username1: "Unknown", username2: "Unknown" };
     }
   }
+
+  /**
+ * @swagger
+ * /game:
+ *   post:
+ *     summary: Create a new Battleship game
+ *     description: Allows a player to create a new Battleship game. Requires player authorization.
+ *     tags:
+ *       - Game
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '201':
+ *         description: Game created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: Game created
+ *                 gameId:
+ *                   type: string
+ *                   description: ID of the newly created game
+ *                   example: 60a7b4f5313e5a001d6fe8a9
+ *       '401':
+ *         description: Unauthorized - Invalid token or insufficient permissions.
+ *       '500':
+ *         description: Internal server error.
+ */
 
 // Battleship Game Routes
 app.post('/game', verifyToken, isPlayer, async (req, res) => {
