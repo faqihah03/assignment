@@ -50,9 +50,7 @@ async function connectToDB() {
 
 connectToDB();
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the BattleShip Game');
-});
+
 
 
 // Authentication: Admin Login
@@ -820,6 +818,11 @@ async function run() {
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);
     });
+
+    app.get('/', (req, res) => {
+        res.send('Welcome to the BattleShip Game');
+      });
+      
   } catch (err) {
     console.error(err);
     process.exit(1);
