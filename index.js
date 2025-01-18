@@ -154,6 +154,61 @@ app.post('/admin/logout', verifyToken, async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /player/signup:
+ *   post:
+ *     summary: Sign up a new player
+ *     description: Create a new player account with a username and password.
+ *     tags:
+ *       - Player
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: Desired username for the new player
+ *                 example: player1
+ *               password:
+ *                 type: string
+ *                 description: Password for the new player
+ *                 example: password123
+ *     responses:
+ *       '201':
+ *         description: Player signed up successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: Player signed up
+ *                 playerId:
+ *                   type: string
+ *                   description: ID of the newly created player
+ *                   example: 60a7b4f5313e5a001d6fe8a9
+ *       '400':
+ *         description: Bad Request - Username already taken.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message
+ *                   example: Username already taken
+ *       '500':
+ *         description: Internal server error.
+ */
+
 // Authentication: Player Sign Up
 app.post('/player/signup', async (req, res) => {
   const { username, password } = req.body;
