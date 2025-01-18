@@ -238,7 +238,7 @@ app.post('/admin/logout', verifyToken, async (req, res) => {
  * /player/signup:
  *   post:
  *     summary: Sign up a new player
- *     description: Create a new player account with a username and password that follows a strong password policy.
+ *     description: Create a new player account with a username and password.
  *     tags:
  *       - Player
  *     requestBody:
@@ -254,8 +254,8 @@ app.post('/admin/logout', verifyToken, async (req, res) => {
  *                 example: player1
  *               password:
  *                 type: string
- *                 description: Password for the new player, must follow the strong password policy
- *                 example: StrongP@ss123
+ *                 description: Password for the new player
+ *                 example: password123
  *     responses:
  *       '201':
  *         description: Player signed up successfully.
@@ -273,7 +273,7 @@ app.post('/admin/logout', verifyToken, async (req, res) => {
  *                   description: ID of the newly created player
  *                   example: 60a7b4f5313e5a001d6fe8a9
  *       '400':
- *         description: Bad Request - Username already taken or password does not meet requirements.
+ *         description: Bad Request - Username already taken.
  *         content:
  *           application/json:
  *             schema:
@@ -282,11 +282,10 @@ app.post('/admin/logout', verifyToken, async (req, res) => {
  *                 message:
  *                   type: string
  *                   description: Error message
- *                   example: "Username already taken" or "Password must be at least 8 characters long and contain one lowercase letter, one uppercase letter, one digit, and one special character."
+ *                   example: Username already taken
  *       '500':
  *         description: Internal server error.
  */
-
 // Authentication: Player Sign Up
 app.post('/player/signup', async (req, res) => {
     const { username, password } = req.body;
@@ -575,7 +574,7 @@ async function isAdminOrPlayer(req, res, next) {
  * /player:
  *   post:
  *     summary: Create a new player
- *     description: Allows an admin to create a new player account with a username and password that follows a strong password policy. Requires admin authorization.
+ *     description: Allows an admin to create a new player account with a username and password. Requires admin authorization.
  *     tags:
  *       - Admin
  *     security:
@@ -593,8 +592,8 @@ async function isAdminOrPlayer(req, res, next) {
  *                 example: player2
  *               password:
  *                 type: string
- *                 description: Password for the new player, must follow the strong password policy
- *                 example: StrongP@ss456
+ *                 description: Password for the new player
+ *                 example: password456
  *     responses:
  *       '201':
  *         description: Player created successfully.
@@ -612,7 +611,7 @@ async function isAdminOrPlayer(req, res, next) {
  *                   description: ID of the newly created player
  *                   example: 60a7b4f5313e5a001d6fe8a9
  *       '400':
- *         description: Bad Request - Username already taken or password does not meet requirements.
+ *         description: Bad Request - Username already taken.
  *         content:
  *           application/json:
  *             schema:
@@ -621,7 +620,7 @@ async function isAdminOrPlayer(req, res, next) {
  *                 message:
  *                   type: string
  *                   description: Error message
- *                   example: "Username already taken" or "Password must be at least 8 characters long and contain one lowercase letter, one uppercase letter, one digit, and one special character."
+ *                   example: Username already taken
  *       '401':
  *         description: Unauthorized - Invalid token or insufficient permissions.
  *       '500':
