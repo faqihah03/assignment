@@ -487,6 +487,65 @@ app.post('/player', verifyToken, isAdmin, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /players:
+ *   get:
+ *     summary: Retrieve all players (Admin only)
+ *     description: Allows an admin to retrieve a list of all players from the game database.
+ *     tags:
+ *       - Players
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: A list of all players in the database.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                     description: The unique ID of the player.
+ *                     example: 60a7b4f5313e5a001d6fe8a9
+ *                   username:
+ *                     type: string
+ *                     description: The username of the player.
+ *                     example: playerOne
+ *                   email:
+ *                     type: string
+ *                     description: The email address of the player.
+ *                     example: playerOne@example.com
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                     description: The date and time when the player was created.
+ *                     example: '2025-01-18T14:25:00Z'
+ *       '403':
+ *         description: Forbidden, the user is not an admin.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "You do not have permission to access this resource."
+ *       '500':
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
+
 // Read all Players (Admin only)
 app.get('/players', verifyToken, isAdmin, async (req, res) => {
   try {
@@ -497,6 +556,82 @@ app.get('/players', verifyToken, isAdmin, async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
+
+/**
+ * @swagger
+ * /player/{id}:
+ *   patch:
+ *     summary: Update a player's information (Player can update their own data, Admin can update any)
+ *     description: Allows a player to update their username or password. Admin can update any player's data.
+ *     tags:
+ *       - Players
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The unique ID of the player to update.
+ *         schema:
+ *           type: string
+ *           example: 60a7b4f5313e5a001d6fe8a9
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: The new username for the player.
+ *                 example: playerNewUsername
+ *               password:
+ *                 type: string
+ *                 description: The new password for the player (hashed).
+ *                 example: newpassword123
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Player data updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Player updated"
+ *       '400':
+ *         description: Bad request, such as when the username is already taken.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Username already taken"
+ *       '404':
+ *         description: Player not found or no updates made.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Player not found"
+ *       '500':
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
 
 // Update a Player by ID (Player can update their own data, Admin can update any)
 app.patch('/player/:id', verifyToken, isAdminOrPlayer, async (req, res) => {
@@ -552,6 +687,58 @@ app.patch('/player/:id', verifyToken, isAdminOrPlayer, async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
+
+
+/**
+ * @swagger
+ * /player/{id}:
+ *   delete:
+ *     summary: Delete a player by ID (Admin only)
+ *     description: Allows an admin to delete a player from the system by their ID.
+ *     tags:
+ *       - Players
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The unique ID of the player to delete.
+ *         schema:
+ *           type: string
+ *           example: 60a7b4f5313e5a001d6fe8a9
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Player deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Player deleted"
+ *       '404':
+ *         description: Player not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Player not found"
+ *       '500':
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
 
 // Delete a Player by ID (Admin only)
 app.delete('/player/:id', verifyToken, isAdmin, async (req, res) => {
@@ -668,6 +855,95 @@ app.post('/game', verifyToken, isPlayer, async (req, res) => {
     }
   });
 
+  /**
+ * @swagger
+ * /game/{id}:
+ *   get:
+ *     summary: Get game information
+ *     description: Retrieve information about a specific game, including player usernames, current player, and board states. Requires authorization.
+ *     tags:
+ *       - Game
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the game to retrieve
+ *         schema:
+ *           type: string
+ *           example: 60a7b4f5313e5a001d6fe8a9
+ *     responses:
+ *       '200':
+ *         description: Game information retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 gameId:
+ *                   type: string
+ *                   description: ID of the game
+ *                   example: 60a7b4f5313e5a001d6fe8a9
+ *                 currentPlayer:
+ *                   type: string
+ *                   description: ID of the current player
+ *                   example: 60a7b4f5313e5a001d6fe8b0
+ *                 player1:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                       description: ID of player 1
+ *                       example: 60a7b4f5313e5a001d6fe8b1
+ *                     username:
+ *                       type: string
+ *                       description: Username of player 1
+ *                       example: player1
+ *                 player2:
+ *                   type: object
+ *                   nullable: true
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                       description: ID of player 2
+ *                       example: 60a7b4f5313e5a001d6fe8b2
+ *                     username:
+ *                       type: string
+ *                       description: Username of player 2
+ *                       example: player2
+ *                 board1:
+ *                   type: array
+ *                   items:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                       description: Board state for player 1
+ *                 board2:
+ *                   type: array
+ *                   items:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                       description: Board state for player 2
+ *                 ships1:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     description: Ships for player 1
+ *                 ships2:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     description: Ships for player 2
+ *       '404':
+ *         description: Game not found.
+ *       '401':
+ *         description: Unauthorized - Invalid token or insufficient permissions.
+ *       '500':
+ *         description: Internal server error.
+ */
+
 // Get game information including player usernames
 app.get('/game/:id', verifyToken, isAdminOrPlayer, async (req, res) => {
   const { id } = req.params;
@@ -703,6 +979,57 @@ app.get('/game/:id', verifyToken, isAdminOrPlayer, async (req, res) => {
   }
 });
   
+
+/**
+ * @swagger
+ * /game/{id}/join:
+ *   post:
+ *     summary: Join an existing game as Player 2
+ *     description: Allows a player to join an existing game as Player 2. The player cannot join their own game, and the game must not already have two players. Requires player authorization.
+ *     tags:
+ *       - Game
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the game to join.
+ *         schema:
+ *           type: string
+ *           example: 60a7b4f5313e5a001d6fe8a9
+ *     responses:
+ *       '200':
+ *         description: Successfully joined the game.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: Joined game
+ *       '400':
+ *         description: Bad request - Game already full or player attempting to join their own game.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               example: Game already full
+ *       '404':
+ *         description: Game not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               example: Game not found
+ *       '401':
+ *         description: Unauthorized - Invalid token or insufficient permissions.
+ *       '500':
+ *         description: Internal server error.
+ */
+
 // Join a Game (Player 2)
 app.post('/game/:id/join', verifyToken, isPlayer, async (req, res) => {
   const { id } = req.params;
@@ -746,6 +1073,124 @@ app.post('/game/:id/join', verifyToken, isPlayer, async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
+
+/**
+ * @swagger
+ * /game/{id}/place:
+ *   post:
+ *     summary: Place ships on the game board
+ *     description: Allows a player to place their ships on the game board. The placement details must be provided, and the API validates the placements against game rules.
+ *     tags:
+ *       - Game
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the game where the ships are to be placed.
+ *         schema:
+ *           type: string
+ *           example: 60a7b4f5313e5a001d6fe8a9
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               placements:
+ *                 type: array
+ *                 description: Array of ship placement details
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     x:
+ *                       type: integer
+ *                       description: X-coordinate of the placement
+ *                       example: 0
+ *                     y:
+ *                       type: integer
+ *                       description: Y-coordinate of the placement
+ *                       example: 1
+ *                     direction:
+ *                       type: string
+ *                       description: Direction of the ship (horizontal or vertical)
+ *                       example: horizontal
+ *                     shipName:
+ *                       type: string
+ *                       description: Name of the ship to be placed
+ *                       example: Destroyer
+ *     responses:
+ *       '200':
+ *         description: Ships placed successfully. May indicate that the game can now start or that it's waiting for the other player.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: Ships placed successfully. Game can now start.
+ *       '400':
+ *         description: Errors during ship placement, such as invalid ship names or overlapping ships.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Errors placing ships
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       message:
+ *                         type: string
+ *                         example: Invalid ship name Destroyer
+ *                       placement:
+ *                         type: object
+ *                         properties:
+ *                           x:
+ *                             type: integer
+ *                             example: 0
+ *                           y:
+ *                             type: integer
+ *                             example: 1
+ *                           direction:
+ *                             type: string
+ *                             example: horizontal
+ *       '403':
+ *         description: Unauthorized - The player is not part of the game or attempting unauthorized ship placement.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               example: Not part of this game
+ *       '404':
+ *         description: Game not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               example: Game not found
+ *       '500':
+ *         description: Internal server error during ship placement.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error placing ships
+ *                 error:
+ *                   type: string
+ *                   example: Some internal error details
+ */
 
 app.post('/game/:id/place', verifyToken, isPlayer, async (req, res) => {
     const { id } = req.params;
@@ -895,6 +1340,110 @@ app.post('/game/:id/place', verifyToken, isPlayer, async (req, res) => {
         res.status(500).json({ message: 'Error placing ships', error: err.message });
     }
 });
+
+/**
+ * @swagger
+ * /game/{id}/move:
+ *   post:
+ *     summary: Make a move in the game
+ *     description: Allows a player to make a move by targeting a coordinate on the opponent's board. The API checks if it's the player's turn, validates the coordinates, and updates the game state accordingly.
+ *     tags:
+ *       - Game
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the game where the move is to be made.
+ *         schema:
+ *           type: string
+ *           example: 60a7b4f5313e5a001d6fe8a9
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               x:
+ *                 type: integer
+ *                 description: X-coordinate of the target cell.
+ *                 example: 5
+ *               y:
+ *                 type: integer
+ *                 description: Y-coordinate of the target cell.
+ *                 example: 3
+ *     responses:
+ *       '200':
+ *         description: Move successful. The response includes the updated game board and whether the move was a hit or miss.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Result of the move (hit or miss)
+ *                   example: Hit! You can continue your turn.
+ *                 yourBoard:
+ *                   type: string
+ *                   description: The current player's board, showing all positions (ships and hits).
+ *                   example: |
+ *                     ~ ~ ~ ~ ~
+ *                     ~ X ~ ~ ~
+ *                     ~ ~ ~ ~ ~
+ *                 opponentBoard:
+ *                   type: string
+ *                   description: The opponent's board, showing only hit/miss information.
+ *                   example: |
+ *                     ~ ~ ~ X ~
+ *                     ~ M ~ ~ ~
+ *                     ~ ~ ~ ~ ~
+ *       '400':
+ *         description: Invalid target coordinates or move (e.g., out of bounds or already targeted).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid target coordinates 10,11. Coordinates must be within 0 to 9.
+ *       '403':
+ *         description: Forbidden action, either the player is not part of the game or it is not their turn.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: It is not your turn
+ *       '404':
+ *         description: Game not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Game not found
+ *       '500':
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error making move
+ *                 error:
+ *                   type: string
+ *                   example: Some internal error details
+ */
 
 app.post('/game/:id/move', verifyToken, isPlayer, async (req, res) => {
   const { id } = req.params;
