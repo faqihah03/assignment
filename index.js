@@ -229,6 +229,47 @@ app.post('/player/signup', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /player/login:
+ *   post:
+ *     summary: Sign in a player
+ *     description: Authenticate a player with their username and password to receive a JWT token.
+ *     tags:
+ *       - Player
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: Player's username
+ *                 example: player1
+ *               password:
+ *                 type: string
+ *                 description: Player's password
+ *                 example: password123
+ *     responses:
+ *       '200':
+ *         description: Login successful, returns a JWT token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: JWT token for authenticated requests
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       '401':
+ *         description: Unauthorized - Invalid credentials.
+ *       '500':
+ *         description: Internal server error.
+ */
+
 // Authentication: Player Sign In
 app.post('/player/login', async (req, res) => {
   const { username, password } = req.body;
